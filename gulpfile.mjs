@@ -901,6 +901,33 @@ function createBuildNumber(done) {
   console.log();
   console.log("### Getting extension build number");
 
+  const manualVersion = process.env.PDFJS_VERSION?.replace(/^v/, "");
+  if (manualVersion) {
+    console.log(`Using PDFJS_VERSION override: ${manualVersion}`);
+    exec('git log --format="%h" -n 1', function (err2, stdout2, stderr2) {
+      let buildCommit = "";
+      if (!err2) {
+        buildCommit = stdout2.replace("\n", "");
+      }
+
+      createStringSource(
+        "version.json",
+        JSON.stringify(
+          {
+            version: manualVersion,
+            build: 0,
+            commit: buildCommit,
+          },
+          null,
+          2
+        )
+      )
+        .pipe(gulp.dest(BUILD_DIR))
+        .on("end", done);
+    });
+    return;
+  }
+
   exec(
     "git log --format=oneline " + config.baseVersion + "..",
     function (err, stdout, stderr) {
@@ -2485,8 +2512,10 @@ gulp.task(
         gulp
           .src(
             [
-              GENERIC_LEGACY_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.{mjs,js}",
-              GENERIC_LEGACY_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.{mjs,js}.map",
+              GENERIC_LEGACY_DIR +
+                "build/{pdf,pdf.worker,pdf.sandbox}.{mjs,js}",
+              GENERIC_LEGACY_DIR +
+                "build/{pdf,pdf.worker,pdf.sandbox}.{mjs,js}.map",
             ],
             { encoding: false }
           )
