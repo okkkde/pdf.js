@@ -1,11 +1,13 @@
 # NOTE
 
-> [!NOTE] This is a fork of [mozilla/pdfjs], with 2 changes:
+> [!NOTE] This is a fork of [mozilla/pdfjs]( https://github.com/mozilla/pdf.js), with 3 changes:
 > 
 > 1. Export ES modules in both .js and .mjs formats, since nginx's default MIME types do not serve .mjs files as `application/javascript`.
 > 2. Downgrade the target browsers for the legacy build to ES6.
 > 3. Add a `typeof` check for `FinalizationRegistry` in pdf.worker.m?js, as it is not supported in older browsers.
-> 4. Regularly synced with upstream [mozilla/pdfjs]; publish updates when a new version is available.
+
+ 
+> [!TIP] This fork regularly synced with upstream mozilla/pdfjs; publish updates when a new version is available.
 
 
 # PDF.js [![CI](https://github.com/mozilla/pdf.js/actions/workflows/ci.yml/badge.svg?query=branch%3Amaster)](https://github.com/mozilla/pdf.js/actions/workflows/ci.yml?query=branch%3Amaster)
