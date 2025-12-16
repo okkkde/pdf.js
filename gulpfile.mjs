@@ -2382,7 +2382,7 @@ function packageJson() {
   const DIST_KEYWORDS = ["Mozilla", "pdf", "pdf.js"];
   const DIST_HOMEPAGE = "https://mozilla.github.io/pdf.js/";
   const DIST_BUGS_URL = "https://github.com/mozilla/pdf.js/issues";
-  const DIST_GIT_URL = "https://github.com/mozilla/pdf.js.git";
+  const DIST_GIT_URL = "https://github.com/okkkde/pdf.js";
   const DIST_LICENSE = "Apache-2.0";
 
   const npmManifest = {
@@ -2476,8 +2476,8 @@ gulp.task(
         gulp
           .src(
             [
-              GENERIC_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.mjs",
-              GENERIC_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.mjs.map",
+              GENERIC_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.{mjs,js}",
+              GENERIC_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.{mjs,js}.map",
             ],
             { encoding: false }
           )
@@ -2485,16 +2485,19 @@ gulp.task(
         gulp
           .src(
             [
-              GENERIC_LEGACY_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.mjs",
-              GENERIC_LEGACY_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.mjs.map",
+              GENERIC_LEGACY_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.{mjs,js}",
+              GENERIC_LEGACY_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.{mjs,js}.map",
             ],
             { encoding: false }
           )
           .pipe(gulp.dest(DIST_DIR + "legacy/build/")),
         gulp
-          .src(MINIFIED_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.min.mjs", {
-            encoding: false,
-          })
+          .src(
+            MINIFIED_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.min.{mjs,js}",
+            {
+              encoding: false,
+            }
+          )
           .pipe(gulp.dest(DIST_DIR + "build/")),
         gulp
           .src(MINIFIED_DIR + "image_decoders/pdf.image_decoders.min.mjs", {
@@ -2503,13 +2506,15 @@ gulp.task(
           .pipe(gulp.dest(DIST_DIR + "image_decoders/")),
         gulp
           .src(
-            MINIFIED_LEGACY_DIR + "build/{pdf,pdf.worker,pdf.sandbox}.min.mjs",
+            MINIFIED_LEGACY_DIR +
+              "build/{pdf,pdf.worker,pdf.sandbox}.min.{mjs,js}",
             { encoding: false }
           )
           .pipe(gulp.dest(DIST_DIR + "legacy/build/")),
         gulp
           .src(
-            MINIFIED_LEGACY_DIR + "image_decoders/pdf.image_decoders.min.mjs",
+            MINIFIED_LEGACY_DIR +
+              "image_decoders/pdf.image_decoders.min.{mjs,js}",
             { encoding: false }
           )
           .pipe(gulp.dest(DIST_DIR + "legacy/image_decoders/")),
