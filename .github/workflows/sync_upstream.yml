@@ -67,16 +67,6 @@ jobs:
         if: steps.in_master.outputs.already == 'false'
         run: npm ci
 
-      - name: Build dist artifacts
-        if: steps.in_master.outputs.already == 'false'
-        run: npx gulp dist
-
-      - name: Publish to npm
-        if: steps.in_master.outputs.already == 'false'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish ./build/dist --access public
-
       - name: Tag synced master with upstream version
         if: steps.in_master.outputs.already == 'false'
         run: |

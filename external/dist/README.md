@@ -1,5 +1,24 @@
 # PDF.js
 
+# NOTE
+
+> [!NOTE] This is a fork of [mozilla/pdfjs]( https://github.com/mozilla/pdf.js), with 3 changes:
+> 
+> 1. Export ES modules in both .js and .mjs formats, since nginx's default MIME types do not serve .mjs files as `application/javascript`.
+> 2. Downgrade the target browsers for the legacy build to ES6.
+> 3. Add a `typeof` check for `FinalizationRegistry` in pdf.worker.m?js, as it is not supported in older browsers.
+
+ 
+> [!TIP] This fork regularly synced with upstream mozilla/pdfjs; publish updates when a new version is available.
+
+> [!NOTE] 本仓库是 [[mozilla/pdfjs]] 的 fork，有三点改动：
+>
+> 1. 导出 ES 模块时同时提供 `.js` 与 `.mjs`，解决 nginx 默认不按 `application/javascript` 提供 `.mjs` 的问题。
+> 2. legacy 构建的目标浏览器降级到 ES6。
+> 3. 在 `pdf.worker.m?js` 中为 `FinalizationRegistry` 增加 `typeof` 检查，兼容不支持该特性的旧浏览器。
+
+> [!TIP] 本仓库会定期与上游 `mozilla/pdfjs` 同步，有新版本时发布更新。
+
 PDF.js is a Portable Document Format (PDF) library that is built with HTML5.
 Our goal is to create a general-purpose, web standards-based platform for
 parsing and rendering PDFs.
