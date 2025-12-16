@@ -1,0 +1,75 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+jobs:
+  sync-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Remember current version
+        id: prev
+        run: |
+          echo "prev_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Add upstream and fetch
+        run: |
+          git remote add upstream https://github.com/mozilla/pdf.js.git
+          git fetch upstream master
+
+      - name: Merge upstream (fast-forward only)
+        run: git merge --ff-only upstream/master
+
+      - name: Read new version
+        id: curr
+        run: |
+          echo "curr_version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Push synced branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git push origin HEAD:master
+
+      - name: Install dependencies
+        if: steps.prev.outputs.prev_version != steps.curr.outputs.curr_version
+        run: npm ci
+
+      - name: Build dist artifacts
+        if: steps.prev.outputs.prev_version != steps.curr.outputs.curr_version
+        run: npx gulp dist
+
+      - name: Publish to npm
+        if: steps.prev.outputs.prev_version != steps.curr.outputs.curr_version
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish ./build/dist
+
+      - name: Tag version
+        if: steps.prev.outputs.prev_version != steps.curr.outputs.curr_version
+        run: |
+          git tag "v${{ steps.curr.outputs.curr_version }}"
+          git push origin "v${{ steps.curr.outputs.curr_version }}"
+
+      - name: Create GitHub release
+        if: steps.prev.outputs.prev_version != steps.curr.outputs.curr_version
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.curr.outputs.curr_version }}
+          generate_release_notes: true

@@ -98,10 +98,15 @@ class IccColorSpace extends ColorSpace {
     if (!this.#transformer) {
       throw new Error("Failed to create ICC color space");
     }
-    IccColorSpace.#finalizer ||= new FinalizationRegistry(transformer => {
-      qcms_drop_transformer(transformer);
-    });
-    IccColorSpace.#finalizer.register(this, this.#transformer);
+    // `FinalizationRegistry` is missing in older ES6-era browsers; skip cleanup
+    // registration when unavailable to avoid ReferenceError. Worst case: the
+    // transformer stays alive a bit longer but functionality is unaffected.
+    if (typeof FinalizationRegistry !== "undefined") {
+      IccColorSpace.#finalizer ||= new FinalizationRegistry(transformer => {
+        qcms_drop_transformer(transformer);
+      });
+      IccColorSpace.#finalizer.register(this, this.#transformer);
+    }
   }
 
   getRgbHex(src, srcOffset) {

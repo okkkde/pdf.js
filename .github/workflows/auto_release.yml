@@ -1,0 +1,70 @@
+name: Auto Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to release (optional when dispatching)"
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+jobs:
+  release:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build dist artifacts
+        run: npx gulp dist
+
+      - name: Package dist
+        run: |
+          tar -czf pdfjs-dist.tar.gz -C build/dist .
+          (cd build/dist && zip -r ../pdfjs-dist.zip .)
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pdfjs-dist
+          path: |
+            pdfjs-dist.tar.gz
+            build/pdfjs-dist.zip
+
+      - name: Publish to npm
+        if: env.NPM_TOKEN != ''
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish ./build/dist
+
+      - name: Create GitHub release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            pdfjs-dist.tar.gz
+            build/pdfjs-dist.zip

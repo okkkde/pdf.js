@@ -78,13 +78,11 @@ const CONFIG_FILE = "pdfjs.config";
 const config = JSON.parse(fs.readFileSync(CONFIG_FILE).toString());
 
 const ENV_TARGETS = [
-  "last 2 versions",
-  "Chrome >= 110",
-  "Firefox ESR",
-  "Safari >= 16.4",
-  "Node >= 20",
+  "chrome >= 61",
+  "firefox >= 60",
+  "safari >= 11",
+  "edge >= 79",
   "> 1%",
-  "not IE > 0",
   "not dead",
 ];
 
@@ -371,6 +369,35 @@ function createWebpackConfig(
         // Emit the errors after emitting the files, so that it's possible to
         // look at the contents of the invalid bundle.
         compilation.errors.push(...errors);
+      });
+    },
+  });
+
+  // Emit `.js` twins for ESM bundles so servers without an .mjs MIME mapping
+  // can still serve the files as modules.
+  // eslint-disable-next-line unicorn/prefer-single-call
+  plugins.push({
+    /** @param {import('webpack').Compiler} compiler */
+    apply(compiler) {
+      compiler.hooks.compilation.tap("DuplicateMjsAssets", compilation => {
+        const stage = webpack2.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS;
+        compilation.hooks.processAssets.tap(
+          { name: "DuplicateMjsAssets", stage },
+          () => {
+            for (const asset of compilation.getAssets()) {
+              if (!asset.name.endsWith(".mjs")) {
+                continue;
+              }
+
+              const jsName = asset.name.replace(/\.mjs$/, ".js");
+              if (compilation.getAsset(jsName)) {
+                continue;
+              }
+
+              compilation.emitAsset(jsName, asset.source, { ...asset.info });
+            }
+          }
+        );
       });
     },
   });
