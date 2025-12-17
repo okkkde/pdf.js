@@ -3,12 +3,61 @@
 > [!NOTE] This is a fork of [mozilla/pdfjs]( https://github.com/mozilla/pdf.js), with 3 changes:
 > 
 > 1. Export ES modules in both .js and .mjs formats, since nginx's default MIME types do not serve .mjs files as `application/javascript`.
-> 2. Downgrade the target browsers for the legacy build to ES6.
-> 3. Add a `typeof` check for `FinalizationRegistry` in pdf.worker.m?js, as it is not supported in older browsers.
+> 2. Downgrade the target browsers for the legacy build to ES6 (more core-js polyfills).
+> 3. Added extra handling for web/DOM APIs used in worker scripts that are not polyfilled by core-js, since bundler like Vite do not automatically polyfill these APIs inside worker scripts.
+>       - Add a `typeof` check for `FinalizationRegistry`, as it is not supported in older browsers.
 
  
-> [!TIP] This fork regularly synced with upstream mozilla/pdfjs; publish updates when a new version is available.
+> [!TIP] This repository is regularly merged and synchronized with the upstream [[mozilla/pdfjs]]. When a new version is released upstream, a new version with the same version number will be released here.
 
+# Quick Start
+
+install
+
+```bash
+npm install @okkkde/pdfjs-dist
+```
+
+use in vite
+
+```typescript
+const pdfjsLib = await import('@okkkde/pdfjs-dist');
+// you can use the legacy worker for improved compatibility
+const pdfjsWorker = await import('@okkkde/pdfjs-dist/legacy/build/pdf.worker.js?worker&url');
+// or modern worker which works on modern browsers, choose at your own
+const pdfjsWorker = await import('@okkkde/pdfjs-dist/build/pdf.worker.js?worker&url');
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+```
+
+# 提示
+
+> [!NOTE] 本仓库是 [[mozilla/pdfjs]] 的 fork，有三点改动：
+>
+> 1. 导出 ES 模块时同时提供 `.js` 与 `.mjs`，解决 nginx 默认不按 `application/javascript` 提供 `.mjs` 的问题。
+> 2. legacy 构建的目标浏览器降级到 ES6（更多的 core-js 模块）。
+> 3. 为 worker 脚本中未被 core-js 覆盖的 web/DOM API 做了额外处理，因为像 Vite 这类打包器不会自动在 worker 里填充这些 API。
+>       - 为 `FinalizationRegistry` 增加 `typeof` 检查，以兼容不支持该特性的旧浏览器。
+
+> [!TIP] 本仓库会定期与上游 [[mozilla/pdfjs]] 合并同步，上游有新版本时跟随发布新的版本号一致的版本。
+
+# 快速开始
+
+安装
+
+```bash
+npm install @okkkde/pdfjs-dist
+```
+
+在 vite 中使用
+
+```typescript
+const pdfjsLib = await import('@okkkde/pdfjs-dist');
+// 为了更好的兼容性，可以使用 legacy worker
+const pdfjsWorker = await import('@okkkde/pdfjs-dist/legacy/build/pdf.worker.js?worker&url');
+// 或者使用现代 worker，适用于现代浏览器，根据需要选择
+const pdfjsWorker = await import('@okkkde/pdfjs-dist/build/pdf.worker.js?worker&url');
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+```
 
 # PDF.js [![CI](https://github.com/mozilla/pdf.js/actions/workflows/ci.yml/badge.svg?query=branch%3Amaster)](https://github.com/mozilla/pdf.js/actions/workflows/ci.yml?query=branch%3Amaster)
 
