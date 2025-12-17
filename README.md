@@ -2,7 +2,7 @@
 
 > [!NOTE] This is a fork of [mozilla/pdfjs]( https://github.com/mozilla/pdf.js), with 3 changes:
 > 
-> 1. Export ES modules in both .js and .mjs formats, since nginx's default MIME types do not serve .mjs files as `application/javascript`.
+> 1. Export ES modules in both .js and .mjs filename extensions, since nginx's default MIME types do not serve .mjs files as `application/javascript`.
 > 2. Downgrade the target browsers for the legacy build to ES6 (more core-js polyfills).
 > 3. Added extra handling for web/DOM APIs used in worker scripts that are not polyfilled by core-js, since bundler like Vite do not automatically polyfill these APIs inside worker scripts.
 >       - Add a `typeof` check for `FinalizationRegistry`, as it is not supported in older browsers.
@@ -26,7 +26,10 @@ const pdfjsLib = await import('@okkkde/pdfjs-dist');
 const pdfjsWorker = await import('@okkkde/pdfjs-dist/legacy/build/pdf.worker.js?worker&url');
 // or modern worker which works on modern browsers, choose at your own
 const pdfjsWorker = await import('@okkkde/pdfjs-dist/build/pdf.worker.js?worker&url');
+// or you can import with situations
+const pdfjsWorker = await import(browser.modern? '@okkkde/pdfjs-dist/build/pdf.worker.js?worker&url' : '@okkkde/pdfjs-dist/legacy/build/pdf.worker.js?worker&url');
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+
 ```
 
 # 提示
@@ -56,6 +59,8 @@ const pdfjsLib = await import('@okkkde/pdfjs-dist');
 const pdfjsWorker = await import('@okkkde/pdfjs-dist/legacy/build/pdf.worker.js?worker&url');
 // 或者使用现代 worker，适用于现代浏览器，根据需要选择
 const pdfjsWorker = await import('@okkkde/pdfjs-dist/build/pdf.worker.js?worker&url');
+// 或者你也可以根据实际情况动态选择要使用的worker版本
+const pdfjsWorker = await import(browser.modern? '@okkkde/pdfjs-dist/build/pdf.worker.js?worker&url' : '@okkkde/pdfjs-dist/legacy/build/pdf.worker.js?worker&url');
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
 ```
 
